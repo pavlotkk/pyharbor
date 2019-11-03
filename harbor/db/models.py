@@ -30,6 +30,8 @@ class DbApartment(Base):
 
     telegram_mgs_id = sa.Column(sa.Text, nullable=True)
 
+    photos = relationship("DbApartmentPhoto", back_populates="apartment")
+
 
 class DbApartmentPhoto(Base):
     __tablename__ = 'apartments_photos'
@@ -37,4 +39,4 @@ class DbApartmentPhoto(Base):
     row_id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     apartment_id = sa.Column(sa.Integer, sa.ForeignKey('apartments.row_id'))
     absolute_photo_url = sa.Column(sa.Text, nullable=False)
-    actor = relationship("DbApartment", backref=backref("photos", uselist=True))
+    apartment = relationship("DbApartment", back_populates="photos")

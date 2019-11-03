@@ -1,5 +1,5 @@
 from harbor.db.base import create_session
-from harbor.db.models import DbApartment
+from harbor.db.models import DbApartment, DbApartmentPhoto
 from harbor.provider.manager import provider_manager
 
 
@@ -8,6 +8,7 @@ class App:
         self.db = create_session()
 
     def load(self):
+        print('start loading')
         loaded_items = provider_manager.load()
 
         for i in loaded_items:
@@ -40,7 +41,14 @@ class App:
             db_apartment.is_new = True
             db_apartment.is_starred = False
 
+            for l in i.photos:
+                db_apartment.photos.append(
+                    DbApartmentPhoto(absolute_photo_url=l)
+                )
+
             self.db.add(db_apartment)
             self.db.flush()
+
+            print(f'New item:\n{i}')
 
         self.db.commit()
