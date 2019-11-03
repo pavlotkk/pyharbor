@@ -2,6 +2,7 @@ import time
 
 import click
 
+from harbor import conf
 from harbor.app import App
 from harbor.db import base as dbbase
 
@@ -27,7 +28,7 @@ def run():
     app = App()
     while True:
         app.load()
-        time.sleep(5)
+        time.sleep(conf.UPDATE_FREQUENCY)
 
 
 if __name__ == "__main__":

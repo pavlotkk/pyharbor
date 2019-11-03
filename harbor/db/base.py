@@ -1,15 +1,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
 from typing import TYPE_CHECKING
+
+from harbor import conf
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session as SqlSession
 
-
-engine = create_engine('sqlite://///Users/paveltkachuk/Documents/projects/pyharbor/storage.db')
-
+engine = create_engine(conf.DB_CONNECTION_STRING)
 
 Base = declarative_base()
 

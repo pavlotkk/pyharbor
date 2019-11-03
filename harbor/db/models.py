@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 
 from harbor.db.base import Base
 

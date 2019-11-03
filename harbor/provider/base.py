@@ -1,14 +1,10 @@
 from typing import Optional, List
 
 
-class RequestHandler:
-    def handle_on_request_start(self):
-        pass
-
-
-class PropertyProvider(RequestHandler):
-    def __init__(self, host: str):
-        self._host = host
+class PropertyProvider:
+    def __init__(self, config: dict):
+        self._config = config
+        self._host = config.get('host')
 
     def load(self) -> List['PropertyItem']:
         raise NotImplemented()

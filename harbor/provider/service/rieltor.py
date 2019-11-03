@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup, Tag
 from harbor.provider.balancer import requester
 from harbor.provider.base import PropertyProvider, PropertyItem
 
-
 Locations = {
     76: "Оболонський",
     104: "Героїв Дніпра (M)",
@@ -412,10 +411,10 @@ class RieltorService(PropertyProvider):
     class Meta:
         name = 'rieltor'
 
-    def __init__(self):
-        super(RieltorService, self).__init__('https://rieltor.ua/flats-sale/')
-        self.max_items = 25
-        self.max_images = 5
+    def __init__(self, config: dict):
+        super(RieltorService, self).__init__(config)
+        self._max_items = self._config.get('max_items_to_load', 25)
+        self._max_images = self._config.get('max_images_to_load', 5)
 
     def load(self) -> List[PropertyItem]:
         items = []
@@ -435,7 +434,6 @@ class RieltorService(PropertyProvider):
 
         page = 1
         while True:
-            self.handle_on_request_start()
             html = requester.get(self._host, params=query.page(page).build()).text
             html_parser = BeautifulSoup(html, features='html.parser')
             html_items = html_parser.find_all('div', class_='catalog-item')
@@ -445,7 +443,7 @@ class RieltorService(PropertyProvider):
             for hi in html_items:
                 link = hi.find('div', class_='catalog-item__img').a['href']
                 links.append(link)
-                if len(links) >= self.max_items:
+                if len(links) >= self._max_items:
                     break
 
             page += 1
@@ -457,7 +455,6 @@ class RieltorService(PropertyProvider):
         item.rel_url = rel_link
         path = urljoin(self._host, rel_link)
 
-        self.handle_on_request_start()
         html = requester.get(path).text
         html_parser = BeautifulSoup(html, features='html.parser')
         html_panel = html_parser.find('div', class_='ov-params-col')
@@ -474,7 +471,8 @@ class RieltorService(PropertyProvider):
                 if dt is None:
                     continue
                 if dt == 'Площа':
-                    square, useful_square, kitchen = re.findall(r'([0-9]+\.*[0-9]*)', html_p.text.strip())
+                    square, useful_square, kitchen = re.findall(r'([0-9]+\.*[0-9]*)',
+                                                                html_p.text.strip())
                     item.square = int(float(square))
                     item.useful_square = int(float(useful_square))
                     item.kitchen = int(float(kitchen))
@@ -489,10 +487,11 @@ class RieltorService(PropertyProvider):
         secondary_params = html_panel.find('dl', class_='ov-params-list_secondary').find_all('dd')
         external_id = secondary_params[4].text
 
-        desc = html_parser.find('div', class_='description-container').find('dd', class_='description-text').text
+        desc = html_parser.find('div', class_='description-container').find('dd',
+                                                                            class_='description-text').text
 
         html_images = html_parser.find('div', {'id': 'carousel-offer-generic'})
-        for html_img in html_images.find_all('img', class_='fancybox')[:self.max_images]:
+        for html_img in html_images.find_all('img', class_='fancybox')[:self._max_images]:
             img_src = html_img['src']
             item.photos.append(img_src)
 
@@ -507,29 +506,12 @@ class RieltorService(PropertyProvider):
     def query(self) -> QueryBuilder:
         return QueryBuilder(
         ).locations(
-            [
-                Locations['Русанівка'],
-                Locations['Героїв Дніпра (M)'],
-                Locations['Мінська (M)'],
-                Locations['Оболонь (M)'],
-                Locations['Тараса Шевченко (M)'],
-                Locations['Контрактова площа (M)'],
-                # Locations['Дорогожичі (M)'],
-                # Locations['Лук&#039;янівська (M)'],
-                Locations['Площа Льва Толстого (M)'],
-                Locations['Універсітет (M)'],
-                Locations['Олімпійська (M)'],
-                Locations['Либідська (M)'],
-                Locations['Васильківська (M)'],
-                Locations['Палац Спорту (M)'],
-                Locations['Палац Україна (M)'],
-                Locations['Лівоборежна (M)'],
-            ]
+            [Locations[l] for l in self._config.get('locations', [])]
         ).price(
-            minimum=50_000,
-            maximum=65_000
+            minimum=self._config.get('price', {}).get('min', 0),
+            maximum=self._config.get('price', {}).get('max', 0),
         ).rooms(
-            [2]
+            self._config.get('rooms', [])
         ).square(
-            minimum=50
+            minimum=self._config.get('square', 0)
         )

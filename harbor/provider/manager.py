@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, List, ClassVar
 
+from harbor import conf
 from harbor.provider.service.rieltor import RieltorService
 
 if TYPE_CHECKING:
@@ -11,7 +12,8 @@ class ProviderManager:
         self.services: List['PropertyProvider'] = []
 
     def register_service(self, s: ClassVar['PropertyProvider']):
-        self.services.append(s())
+        provider_config = next((p for p in conf.PROVIDERS if p['name'] == s.Meta.name), {})
+        self.services.append(s(provider_config))
 
     def load(self) -> List['PropertyItem']:
         items = []
@@ -22,5 +24,8 @@ class ProviderManager:
         return items
 
 
+all_providers = [RieltorService]
+active_provider_keys = [p['name'] for p in conf.PROVIDERS]
 provider_manager = ProviderManager()
-provider_manager.register_service(RieltorService)
+for provider_cls in [cls for cls in all_providers if cls.Meta.name in active_provider_keys]:
+    provider_manager.register_service(provider_cls)
