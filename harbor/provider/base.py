@@ -15,8 +15,8 @@ class PropertyProvider(RequestHandler):
 
 
 class PropertyItem:
-    def __init__(self, source: str, rel_url: str):
-        self.source = source
+    def __init__(self, provider: str, rel_url: str):
+        self.provider = provider
         self.rel_url = rel_url
         self.address: Optional[str] = None
         self.rooms: int = 0

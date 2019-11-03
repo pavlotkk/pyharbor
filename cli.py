@@ -1,6 +1,9 @@
+import time
+
 import click
 
 from harbor.app import App
+from harbor.db import base as dbbase
 
 
 @click.group()
@@ -9,9 +12,22 @@ def cli():
 
 
 @cli.command()
+def drop_db():
+    dbbase.drop_all()
+
+
+@cli.command()
+def init_db():
+    dbbase.drop_all()
+    dbbase.create_all()
+
+
+@cli.command()
 def run():
     app = App()
-    app.load()
+    while True:
+        app.load()
+        time.sleep(5)
 
 
 if __name__ == "__main__":

@@ -3,9 +3,9 @@ from enum import Enum
 from typing import List, Tuple
 from urllib.parse import urljoin
 
-import requests
 from bs4 import BeautifulSoup, Tag
 
+from harbor.provider.balancer import requester
 from harbor.provider.base import PropertyProvider, PropertyItem
 
 
@@ -138,7 +138,7 @@ class RieltorService(PropertyProvider):
         page = 1
         while True:
             self.handle_on_request_start()
-            html = requests.get(self._host, params=query.page(page).build()).text
+            html = requester.get(self._host, params=query.page(page).build()).text
             html_parser = BeautifulSoup(html, features='html.parser')
             html_items = html_parser.find_all('div', class_='catalog-item')
             if not html_items:
@@ -156,9 +156,11 @@ class RieltorService(PropertyProvider):
 
     def _load_info(self, rel_link) -> PropertyItem:
         item = PropertyItem(self.Meta.name, rel_link)
+        item.rel_url = rel_link
         path = urljoin(self._host, rel_link)
 
-        html = requests.get(path).text
+        self.handle_on_request_start()
+        html = requester.get(path).text
         html_parser = BeautifulSoup(html, features='html.parser')
         html_panel = html_parser.find('div', class_='ov-params-col')
         address = html_panel.find('h1', class_='catalog-view-header__title ov-title').a.string
@@ -209,7 +211,7 @@ class RieltorService(PropertyProvider):
         ).locations(
             [Locations['Герое Днепра (М)']]
         ).price(
-            minimum=50_000
+            minimum=60_000
         ).rooms(
             [2]
         ).square(
