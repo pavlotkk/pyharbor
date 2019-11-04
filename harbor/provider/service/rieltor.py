@@ -458,7 +458,6 @@ class RieltorService(PropertyProvider):
         html = requester.get(path).text
         html_parser = BeautifulSoup(html, features='html.parser')
         html_panel = html_parser.find('div', class_='ov-params-col')
-        address = html_panel.find('h1', class_='catalog-view-header__title ov-title').a.string
         price = html_panel.find('div', class_='ov-price').contents[0]
         price = int(''.join(price.split()))
 
@@ -485,10 +484,11 @@ class RieltorService(PropertyProvider):
                     item.max_floor = int(max_floor)
 
         secondary_params = html_panel.find('dl', class_='ov-params-list_secondary').find_all('dd')
-        external_id = secondary_params[4].text
+        external_id = secondary_params[4].text.strip()
 
-        desc = html_parser.find('div', class_='description-container').find('dd',
-                                                                            class_='description-text').text
+        html_desc_container = html_parser.find('div', class_='description-container')
+        desc = html_desc_container.find('dd', class_='description-text').text.strip()
+        address = html_desc_container.find_all('dd', class_='description-text')[-1].text.strip().rsplit(',', maxsplit=1)[0]
 
         html_images = html_parser.find('div', {'id': 'carousel-offer-generic'})
         for html_img in html_images.find_all('img', class_='fancybox')[:self._max_images]:
