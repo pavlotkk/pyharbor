@@ -30,3 +30,5 @@ logging.basicConfig(
 DB_CONNECTION_STRING = f'sqlite:////{config_root}/storage.db'
 PROVIDERS = config.get('providers', [])
 UPDATE_FREQUENCY = config.get('app', {}).get('update_frequency', 30)
+MAX_REQUEST_RATE = config.get('app', {}).get('max_request_rate', 5)
+REQUESTS_DELAY_SEC = config.get('app', {}).get('delay_sec', 3)

@@ -1,6 +1,8 @@
 {
   "app": {
-    "update_frequency": 30
+    "update_frequency": 30,
+    "max_request_rate": 5,
+    "requests_delay": 3
   },
   "providers": [
       {

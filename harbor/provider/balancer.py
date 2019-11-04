@@ -1,3 +1,4 @@
+import logging
 import time
 from collections import defaultdict
 from urllib.parse import urlparse
@@ -7,8 +8,13 @@ from typing import TYPE_CHECKING
 
 import requests
 
+from harbor import conf
+
 if TYPE_CHECKING:
     from requests import Response
+
+
+logger = logging.getLogger(__name__)
 
 
 class RequestStat:
@@ -20,14 +26,15 @@ class RequestStat:
 class AntiSpamRequestBalancer:
     def __init__(self):
         self.hosts = defaultdict(int)
-        self.max_requests = 5
-        self.delay_sec = 3
+        self.max_requests = conf.MAX_REQUEST_RATE
+        self.delay_sec = conf.REQUESTS_DELAY_SEC
 
     def get(self, url: str, params: dict = None) -> 'Response':
         host = urlparse(url).hostname
         count = self.hosts[host]
         if count > self.max_requests:
             self.hosts[host] = 0
+            logger.info(f"rate limit for {host} is exceeded")
             time.sleep(self.delay_sec)
 
         self.hosts[host] += 1
