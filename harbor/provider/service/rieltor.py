@@ -458,7 +458,12 @@ class RieltorService(PropertyProvider):
         html = requester.get(path).text
         html_parser = BeautifulSoup(html, features='html.parser')
         html_panel = html_parser.find('div', class_='ov-params-col')
-        price = html_panel.find('div', class_='ov-price').contents[0]
+        html_price = html_panel.find('div', class_='ov-price')
+        currency = html_price.find('span', class_='ov-price-currency').contents[0].string.strip()
+        if currency != '$':
+            pass
+            # TODO: parse USD currency
+        price = html_price.contents[0]
         price = int(''.join(price.split()))
 
         html_params = html_panel.find('dl', class_='ov-params-list')
