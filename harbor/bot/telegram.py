@@ -66,7 +66,7 @@ class TelegramBot:
 
     def post_all_apartments(self):
         logger.info("Publish data to Bot")
-        apts = self._db.query(DbApartment).filter(DbApartment.is_new).all()  # type: List[DbApartment]
+        apts = self._db.query(DbApartment).filter(DbApartment.is_new).limit(2).all()  # type: List[DbApartment]
         for apt in apts:
             ids = self.post_apartment(apt)
             apt.set_telegram_message_ids(ids)
@@ -79,8 +79,9 @@ class TelegramBot:
         photo_messages = self._updater.bot.send_media_group(
             chat_id=self._main_chat_id,
             media=photos,
+            timeout=20,
         )
-        message_ids = [m.message_id for m in photo_messages]
+        message_ids = [str(m.message_id) for m in photo_messages]
 
         star_btn = InlineKeyboardButton(
             text="👍",
@@ -102,11 +103,12 @@ class TelegramBot:
                  f'{apartment.address}\n'
                  f'{apartment.short_description}\n\n'
                  f'{apartment.absolute_url}',
-            reply_markup=reply_markup
+            reply_markup=reply_markup,
+            timeout=20,
         )
-        message_ids.append(response.message_id)
+        message_ids.append(str(response.message_id))
 
-        return response.message_id
+        return message_ids
 
     def send_pong(self, chat_id: Union[int, str], telegram_user: str):
         self._updater.bot.send_message(chat_id=chat_id, text='pong from user {} in chat {}'.format(

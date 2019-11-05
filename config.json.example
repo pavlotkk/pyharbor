@@ -11,7 +11,7 @@
         "name": "rieltor",
         "host": "https://rieltor.ua/flats-sale/",
         "max_items_to_load": 25,
-        "max_images_to_load": 5,
+        "max_images_to_load": 3,
         "locations": [
             "Оболонський": 76,
             "Героїв Дніпра (M)",
