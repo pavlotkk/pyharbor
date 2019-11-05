@@ -2,7 +2,9 @@
   "app": {
     "update_frequency": 30,
     "max_request_rate": 5,
-    "requests_delay": 3
+    "requests_delay": 3,
+    "telegram_api_token": "_api_token_",
+    "telegram_chat_id": "@chat_name"
   },
   "providers": [
       {

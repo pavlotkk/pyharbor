@@ -38,6 +38,7 @@ class PropertyItem:
             max_words = total_words
         return ' '.join(words[:max_words - 1]) + '...'
 
+
     def __repr__(self):
         return f'<Flat external_id={self.external_id} ' \
                f'address="{self.address}" ' \

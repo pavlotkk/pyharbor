@@ -1,9 +1,11 @@
 from datetime import datetime
+from typing import List, Optional, Union
 
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from harbor.db.base import Base
+from harbor.utils import trim_content
 
 
 class DbApartment(Base):
@@ -13,6 +15,7 @@ class DbApartment(Base):
     external_id = sa.Column(sa.Text, nullable=False)
     provider = sa.Column(sa.Text, nullable=False)
     rel_url = sa.Column(sa.Text, nullable=True)
+    absolute_url = sa.Column(sa.Text, nullable=True)
     address = sa.Column(sa.Text, nullable=True)
     rooms = sa.Column(sa.Integer, nullable=False, default=0)
     floor = sa.Column(sa.Integer, nullable=False, default=0)
@@ -31,6 +34,29 @@ class DbApartment(Base):
     telegram_mgs_id = sa.Column(sa.Text, nullable=True)
 
     photos = relationship("DbApartmentPhoto", back_populates="apartment")
+
+    @property
+    def short_description(self) -> str:
+        return trim_content(self.description)
+
+    def get_telegram_message_ids(self) -> List[str]:
+        if not self.telegram_mgs_id:
+            return []
+        return self.telegram_mgs_id.split(',')
+
+    def set_telegram_message_ids(self, message_id: Optional[Union[List[str], str]]):
+        if not message_id:
+            self.telegram_mgs_id = None
+            return
+
+        ids = self.get_telegram_message_ids()
+
+        if isinstance(message_id, str):
+            ids.append(message_id)
+        else:
+            ids.extend(message_id)
+
+        self.telegram_mgs_id = ','.join((list(set(ids))))
 
 
 class DbApartmentPhoto(Base):

@@ -1,6 +1,10 @@
 import logging
-from typing import TYPE_CHECKING, Tuple, Optional
+from threading import Event
+from typing import TYPE_CHECKING, Optional
+from urllib.parse import urljoin
 
+from harbor import conf
+from harbor.bot.telegram import TelegramBot
 from harbor.db.base import create_session
 from harbor.db.models import DbApartment, DbApartmentPhoto
 from harbor.provider.manager import provider_manager
@@ -14,6 +18,10 @@ logger = logging.getLogger(__name__)
 class App:
     def __init__(self):
         self.db = create_session()
+        self.telegram_client = TelegramBot(conf.TELEGRAM_API_KEY, conf.TELEGRAM_CHAT_ID)
+        self.telegram_client.start_polling()
+
+        self._is_released = Event()
 
     def load(self):
         logger.info("Start loading data")
@@ -30,6 +38,8 @@ class App:
 
         self.db.commit()
         logger.info("Finish loading data")
+
+        self.telegram_client.post_all_apartments()
 
     def _create_or_none(self, data: 'PropertyItem') -> Optional[DbApartment]:
         exists = self.db.query(
@@ -61,9 +71,16 @@ class App:
         db_apartment.is_new = True
         db_apartment.is_starred = False
 
+        host = conf.get_provider(data.provider)['host']
+        db_apartment.absolute_url = urljoin(host, data.rel_url)
+
         for link in data.photos:
             db_apartment.photos.append(
                 DbApartmentPhoto(absolute_photo_url=link)
             )
 
         return db_apartment
+
+    def release(self):
+        self._is_released.set()
+        self.telegram_client.stop_polling()

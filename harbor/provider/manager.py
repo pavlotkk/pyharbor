@@ -12,7 +12,7 @@ class ProviderManager:
         self.services: List['PropertyProvider'] = []
 
     def register_service(self, s: ClassVar['PropertyProvider']):
-        provider_config = next((p for p in conf.PROVIDERS if p['name'] == s.Meta.name), {})
+        provider_config = conf.get_provider(s.Meta.name)
         self.services.append(s(provider_config))
 
     def load(self) -> List['PropertyItem']:
