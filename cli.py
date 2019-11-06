@@ -25,15 +25,11 @@ def init_db():
 
 
 @cli.command()
-@click.option('--name', prompt='Provider name')
 @click.option('--url', prompt='Relative url')
-def provider_load(name: str, url: str):
-    from harbor.provider.manager import provider_manager
-    service = next((s for s in provider_manager.services if s.Meta.name == name), None)
-    if not service:
-        print(f'"{service}" is not registered')
-        return
-    print(service._load_info(url))
+def rieltor(url: str):
+    from harbor.provider.service.rieltor import RieltorService
+    service = RieltorService.get_default()
+    print(service.load_item(url))
 
 
 @cli.command()

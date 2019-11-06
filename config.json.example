@@ -9,7 +9,7 @@
   "providers": [
       {
         "name": "rieltor",
-        "host": "https://rieltor.ua/flats-sale/",
+        "base_url": "https://rieltor.ua/flats-sale/",
         "max_items_to_load": 25,
         "max_images_to_load": 3,
         "locations": [
@@ -164,12 +164,10 @@
             "Михайлівська Борщагівка",
             "Братська Борщагівка",
         ],
-        "price": {
-          "min": 50000,
-          "max": 65000
-        },
+        "price_min": 50000,
+        "price_max": 65000,
         "rooms": [2],
-        "square": 50
+        "min_square": 50
       }
   ]
 }

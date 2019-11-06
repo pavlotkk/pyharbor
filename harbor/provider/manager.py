@@ -13,7 +13,7 @@ class ProviderManager:
 
     def register_service(self, s: ClassVar['PropertyProvider']):
         provider_config = conf.get_provider(s.Meta.name)
-        self.services.append(s(provider_config))
+        self.services.append(s(provider_config['base_url'], **provider_config))
 
     def load(self) -> List['PropertyItem']:
         items = []
