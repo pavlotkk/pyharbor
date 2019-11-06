@@ -34,7 +34,7 @@ class RieltorService(PropertyProvider):
         provider = conf.get_provider(cls.Meta.name)
         return cls(
             provider['base_url'],
-            **provider
+            **provider['filter']
         )
 
     def load(self) -> List[PropertyItem]:

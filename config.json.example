@@ -10,7 +10,8 @@
       {
         "name": "rieltor",
         "base_url": "https://rieltor.ua/flats-sale/",
-        "max_items_to_load": 25,
+        "filter": {
+                "max_items_to_load": 25,
         "max_images_to_load": 3,
         "locations": [
             "Оболонський": 76,
@@ -168,6 +169,7 @@
         "price_max": 65000,
         "rooms": [2],
         "min_square": 50
+        }
       }
   ]
 }

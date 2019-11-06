@@ -24,12 +24,11 @@ class DbApartment(Base):
     useful_square = sa.Column(sa.Integer, nullable=False, default=0)
     kitchen_square = sa.Column(sa.Integer, nullable=False, default=0)
     price = sa.Column(sa.Integer, nullable=False)
-    currency = sa.Column(sa.Text, nullable=False)
     description = sa.Column(sa.Text, nullable=True)
     create_dts = sa.Column(sa.DateTime, nullable=False, default=datetime.utcnow)
 
     is_new = sa.Column(sa.Boolean, nullable=False, default=False)
-    is_starred = sa.Column(sa.Boolean, nullable=False, default=False)
+    is_liked = sa.Column(sa.Boolean, nullable=False, default=False)
 
     telegram_mgs_id = sa.Column(sa.Text, nullable=True)
 

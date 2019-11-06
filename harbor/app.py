@@ -66,10 +66,9 @@ class App:
         db_apartment.useful_square = data.useful_square
         db_apartment.kitchen_square = data.kitchen
         db_apartment.price = data.price
-        db_apartment.currency = 'USD'
         db_apartment.description = data.description
         db_apartment.is_new = True
-        db_apartment.is_starred = False
+        db_apartment.is_liked = False
 
         host = conf.get_provider(data.provider)['host']
         db_apartment.absolute_url = urljoin(host, data.rel_url)

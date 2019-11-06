@@ -67,7 +67,7 @@ class TelegramBot:
 
         self._client.update_apartment_message(message_id, apartment)
 
-        apartment.is_starred = True
+        apartment.is_liked = True
 
         self._db.commit()
 
