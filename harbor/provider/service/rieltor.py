@@ -460,11 +460,17 @@ class RieltorService(PropertyProvider):
         html_panel = html_parser.find('div', class_='ov-params-col')
         html_price = html_panel.find('div', class_='ov-price')
         currency = html_price.find('span', class_='ov-price-currency').contents[0].string.strip()
+        price = 0
         if currency != '$':
-            pass
-            # TODO: parse USD currency
-        price = html_price.contents[0]
-        price = int(''.join(price.split()))
+            html_currency_table = html_panel.find('table', class_='ov-price-box__other-curr-table')
+            for html_tr in html_currency_table.find_all('tr'):
+                other_currency = html_tr.find('span', class_='ov-price-box__other-curr').contents[0].string.strip()
+                if other_currency == '$':
+                    price = html_tr.find('span', class_='ov-price-box__other-curr-val').contents[0].string.strip()
+                    price = int(''.join(price.split()))
+        else:
+            price = html_price.contents[0].string.strip()
+            price = int(''.join(price.split()))
 
         html_params = html_panel.find('dl', class_='ov-params-list')
         dt = None
