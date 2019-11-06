@@ -53,7 +53,15 @@ class TelegramBot:
         return [str(m) for m in message_ids]
 
     def _get_new_apartments(self) -> List[DbApartment]:
-        return self._db.query(DbApartment).filter(DbApartment.is_new).limit(2).all()
+        return self._db.query(
+            DbApartment
+        ).filter(
+            DbApartment.is_new
+        ).order_by(
+            DbApartment.create_dts
+        ).limit(
+            2
+        ).all()
 
     def _like_action_handler(self, message_id: int, apt_id: int):
         apartment = self._db.query(
