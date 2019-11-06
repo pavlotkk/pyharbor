@@ -25,15 +25,6 @@ def init_db():
 
 
 @cli.command()
-def chat_id():
-    from harbor.bot.telegram import TelegramBot
-    from harbor import conf
-    bot = TelegramBot(conf.TELEGRAM_API_KEY, conf.TELEGRAM_CHAT_ID)
-
-    print(bot._get_chat_id())
-
-
-@cli.command()
 @click.option('--name', prompt='Provider name')
 @click.option('--url', prompt='Relative url')
 def provider_load(name: str, url: str):

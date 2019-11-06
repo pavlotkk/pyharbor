@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 from urllib.parse import urljoin
 
 from harbor import conf
-from harbor.bot.telegram import TelegramBot
+from harbor.bot import TelegramBot
 from harbor.db.base import create_session
 from harbor.db.models import DbApartment, DbApartmentPhoto
 from harbor.provider.manager import provider_manager
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class App:
     def __init__(self):
         self.db = create_session()
-        self.telegram_client = TelegramBot(conf.TELEGRAM_API_KEY, conf.TELEGRAM_CHAT_ID)
+        self.telegram_client = TelegramBot.get_default()
         self.telegram_client.start_polling()
 
         self._is_released = Event()
