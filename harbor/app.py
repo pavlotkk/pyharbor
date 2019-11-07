@@ -5,8 +5,8 @@ from urllib.parse import urljoin
 
 from harbor import conf
 from harbor.bot import TelegramBot
-from harbor.db.base import create_session
 from harbor.db.models import DbApartment, DbApartmentPhoto
+from harbor.db.service import DbService
 from harbor.provider.manager import provider_manager
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class App:
     def __init__(self):
-        self.db = create_session()
+        self.db = DbService()
         self.telegram_client = TelegramBot.get_default()
         self.telegram_client.start_polling()
 
@@ -31,25 +31,16 @@ class App:
             db_apartment = self._create_or_none(item)
 
             if db_apartment:
-                self.db.add(db_apartment)
-                self.db.flush()
+                self.db.add_apartment(db_apartment)
 
                 logger.info(f'New property item:\n{item}')
 
-        self.db.commit()
         logger.info("Finish loading data")
 
         self.telegram_client.post_new_apartments()
 
     def _create_or_none(self, data: 'PropertyItem') -> Optional[DbApartment]:
-        exists = self.db.query(
-            self.db.query(
-                DbApartment
-            ).filter(
-                DbApartment.external_id == data.external_id,
-                DbApartment.provider == data.provider
-            ).exists()
-        ).scalar()
+        exists = self.db.is_apartment_exists(data.provider, data.external_id)
 
         if exists:
             return None

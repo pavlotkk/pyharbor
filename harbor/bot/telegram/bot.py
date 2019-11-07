@@ -3,8 +3,8 @@ import traceback
 from typing import Union, List
 
 from harbor.bot.telegram.client import BotClient, BotAction
-from harbor.db.base import create_session
 from harbor.db.models import DbApartment, DbApartmentPhoto
+from harbor.db.service import DbService
 
 logger = logging.getLogger()
 ChatId = Union[str, int]
@@ -13,7 +13,7 @@ ChatId = Union[str, int]
 class TelegramBot:
     def __init__(self, api_token: str, main_chat_id: ChatId):
         self._client = BotClient(api_token, main_chat_id)
-        self._db = create_session()
+        self._db = DbService()
 
         self._client.add_handler(BotAction.Like, self._like_action_handler)
         self._client.add_handler(BotAction.Dislike, self._dislike_action_handler)
@@ -39,12 +39,10 @@ class TelegramBot:
 
     def post_new_apartments(self):
         logger.info("Publish new apartments to Bot")
-        apts = self._get_new_apartments()
+        apts = self._db.get_new_apartments(2)
         for apt in apts:
             ids = self.post_apartment(apt)
-            apt.set_telegram_message_ids(ids)
-            apt.is_new = False
-            self._db.commit()
+            self._db.set_is_not_new(apt.row_id, ids)
 
     def post_apartment(self, apartment: DbApartment) -> List[str]:
         photos = apartment.photos  # type: List[DbApartmentPhoto]
@@ -52,47 +50,24 @@ class TelegramBot:
 
         return [str(m) for m in message_ids]
 
-    def _get_new_apartments(self) -> List[DbApartment]:
-        return self._db.query(
-            DbApartment
-        ).filter(
-            DbApartment.is_new
-        ).order_by(
-            DbApartment.create_dts
-        ).limit(
-            2
-        ).all()
-
     def _like_action_handler(self, message_id: int, apt_id: int):
-        apartment = self._db.query(
-            DbApartment
-        ).filter(
-            DbApartment.row_id == apt_id
-        ).first()  # type: DbApartment
+        apartment = self._db.get_apartment_by_id(apt_id)
 
         if not apartment:
             return
 
         self._client.update_apartment_message(message_id, apartment)
 
-        apartment.is_liked = True
-
-        self._db.commit()
+        self._db.set_is_liked(apartment.row_id)
 
     def _dislike_action_handler(self, message_id: int, apt_id: int):
-        apartment = self._db.query(
-            DbApartment
-        ).filter(
-            DbApartment.row_id == apt_id
-        ).first()  # type: DbApartment
+        apartment = self._db.get_apartment_by_id(apt_id)
         if not apartment:
             return
 
         self._client.delete_apartment_message(apartment)
 
-        apartment.set_telegram_message_ids(None)
-
-        self._db.commit()
+        self._db.set_disliked(apartment.row_id)
 
     def _error_action_handler(self, e):
         logger.error('telegram - {}'.format(str(e)))
