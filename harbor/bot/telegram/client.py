@@ -111,7 +111,8 @@ class BotClient:
                  f'{apartment.address}\n'
                  f'{apartment.short_description}\n\n'
                  f'{apartment.absolute_url}',
-            reply_markup=None
+            reply_markup=None,
+            timeout=20,
         )
 
         return response.message_id
@@ -119,7 +120,7 @@ class BotClient:
     def delete_apartment_message(self, apartment: 'DbApartment'):
         tel_message_ids = apartment.telegram.get_message_ids()
         for m_id in tel_message_ids:
-            self._updater.bot.delete_message(self._main_chat_id, int(m_id))
+            self._updater.bot.delete_message(self._main_chat_id, int(m_id), timeout=20)
 
     def _apartment_action_callback(self, update: Update, context: CallbackContext):
         query_data = update.callback_query.data  # type: str
@@ -151,10 +152,10 @@ class BotClient:
 
     def _on_like_handler(self, message_id: int, obj_id: int):
         callback = self._handlers.get(BotAction.Like, None)
-        if not callback:
+        if callback:
             callback(message_id, obj_id)
 
     def _on_dislike_handler(self, message_id: int, obj_id: int):
         callback = self._handlers.get(BotAction.Dislike, None)
-        if not callback:
+        if callback:
             callback(message_id, obj_id)

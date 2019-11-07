@@ -37,6 +37,14 @@ def rieltor(url: str):
 
 
 @cli.command()
+def telegram():
+    from harbor.bot.telegram.bot import TelegramBot
+    bot = TelegramBot.get_default()
+    bot.start_polling()
+    bot.idle()
+
+
+@cli.command()
 def run():
     app = App()
 

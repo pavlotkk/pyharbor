@@ -1,4 +1,3 @@
-import logging
 from threading import Event
 from typing import TYPE_CHECKING, Optional
 from urllib.parse import urljoin
@@ -7,12 +6,11 @@ from harbor import conf
 from harbor.bot import TelegramBot
 from harbor.db.models import DbApartment, DbApartmentPhoto
 from harbor.db.service import DbService
+from harbor import logger
 from harbor.provider.manager import provider_manager
 
 if TYPE_CHECKING:
     from harbor.provider.base import PropertyItem
-
-logger = logging.getLogger(__name__)
 
 
 class App:
@@ -59,7 +57,6 @@ class App:
         db_apartment.kitchen_square = data.kitchen
         db_apartment.price = data.price
         db_apartment.description = data.description
-        db_apartment.is_new = True
         db_apartment.is_liked = False
 
         host = conf.get_provider(data.provider)['base_url']

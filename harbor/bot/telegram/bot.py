@@ -1,12 +1,13 @@
-import logging
 import traceback
+from requests.exceptions import HTTPError
 from typing import Union, List
 
+from harbor import logger
 from harbor.bot.telegram.client import BotClient, BotAction
 from harbor.db.models import DbApartment, DbApartmentPhoto
 from harbor.db.service import DbService
 
-logger = logging.getLogger()
+
 ChatId = Union[str, int]
 
 
@@ -49,16 +50,24 @@ class TelegramBot:
 
     def post_new_apartments(self):
         logger.info("Publish new apartments to Bot")
-        apts = self._db.get_new_apartments(2)
+        apts = self._db.get_new_apartments(1)
         for apt in apts:
             self.post_apartment(apt)
 
     def post_apartment(self, apartment: DbApartment) -> List[str]:
         photos = apartment.photos  # type: List[DbApartmentPhoto]
-        message_media_ids = self._client.post_apartment_photos(photos)
+        try:
+            message_media_ids = self._client.post_apartment_photos(photos)
+        except HTTPError as ex:
+            logger.exception(ex)
+            return []
         self._db.add_telegram_apartment_photo_messages(apartment.row_id, [str(m) for m in message_media_ids])
 
-        message_description_id = self._client.post_apartment_description(apartment)
+        try:
+            message_description_id = self._client.post_apartment_description(apartment)
+        except HTTPError as ex:
+            logger.exception(ex)
+            return []
         self._db.add_telegram_apartment_description_message(apartment.row_id, str(message_description_id))
 
         return [str(m) for m in message_media_ids] + [str(message_description_id)]
@@ -69,7 +78,11 @@ class TelegramBot:
         if not apartment:
             return
 
-        self._client.update_apartment_message(message_id, apartment)
+        try:
+            self._client.update_apartment_message(message_id, apartment)
+        except HTTPError as ex:
+            logger.exception(ex)
+            return
 
         self._db.set_is_liked(apartment.row_id)
 
@@ -78,7 +91,11 @@ class TelegramBot:
         if not apartment:
             return
 
-        self._client.delete_apartment_message(apartment)
+        try:
+            self._client.delete_apartment_message(apartment)
+        except HTTPError as ex:
+            logger.exception(ex)
+            return
 
         self._db.remove_telegram_messages(apartment)
 

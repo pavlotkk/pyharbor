@@ -3,12 +3,13 @@ from threading import Lock
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 from harbor.db.base import create_session
-from harbor.db.models import DbApartment, DbTelegram
+from harbor.db.models import DbApartment, DbTelegram, DbApartmentPhoto
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import SqlSession, joinedload
+    from sqlalchemy.orm import SqlSession
 
 _lock = Lock()
 
@@ -45,10 +46,14 @@ class DbService:
             ).options(
                 joinedload(DbApartment.photos),
                 joinedload(DbApartment.telegram),
+            ).outerjoin(
+                DbTelegram
+            ).outerjoin(
+                DbApartmentPhoto
             ).filter(
                 or_(
-                    DbApartment.telegram.photo_sent_dts == None,
-                    DbApartment.telegram.description_sent_dts == None
+                    DbTelegram.photo_sent_dts is None,
+                    DbTelegram.description_sent_dts is None
                 )
             ).all()
 
@@ -63,14 +68,18 @@ class DbService:
             ).options(
                 joinedload(DbApartment.photos),
                 joinedload(DbApartment.telegram),
+            ).outerjoin(
+                DbTelegram
+            ).outerjoin(
+                DbApartmentPhoto
             ).filter(
-                DbApartment.telegram.photo_sent_dts != None,
-                DbApartment.telegram.description_sent_dts != None
+                DbTelegram.photo_sent_dts == None,
+                DbTelegram.description_sent_dts == None
             ).order_by(
                 DbApartment.create_dts
             )
 
-        if not limit:
+        if limit:
             query = query.limit(limit)
 
         data = query.all()
@@ -85,6 +94,10 @@ class DbService:
             ).options(
                 joinedload(DbApartment.photos),
                 joinedload(DbApartment.telegram),
+            ).outerjoin(
+                DbTelegram
+            ).outerjoin(
+                DbApartmentPhoto
             ).filter(
                 DbApartment.row_id == apt_id
             ).first()

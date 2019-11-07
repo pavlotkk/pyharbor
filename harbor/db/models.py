@@ -32,13 +32,12 @@ class DbApartment(Base):
     photos = relationship("DbApartmentPhoto", back_populates="apartment")
     telegram = relationship('DbTelegram', back_populates='apartment', uselist=False)
 
+    def __repr__(self):
+        return f'<DbApartment id={self.row_id}>'
+
     @property
     def short_description(self) -> str:
         return trim_content(self.description)
-
-    @provider
-    def is_new(self):
-        return False
 
 
 class DbApartmentPhoto(Base):
@@ -48,6 +47,9 @@ class DbApartmentPhoto(Base):
     apartment_id = sa.Column(sa.Integer, sa.ForeignKey('apartments.row_id'))
     absolute_photo_url = sa.Column(sa.Text, nullable=False)
     apartment = relationship("DbApartment", back_populates="photos")
+
+    def __repr__(self):
+        return f'<DbApartmentPhoto id={self.row_id}>'
 
 
 class DbTelegram(Base):
@@ -80,3 +82,6 @@ class DbTelegram(Base):
             ids.extend(message_id)
 
         self.mgs_ids = ','.join((list(set(ids))))
+
+    def __repr__(self):
+        return f'<DbTelegram id={self.row_id}, msg_ids={self.mgs_ids}>'

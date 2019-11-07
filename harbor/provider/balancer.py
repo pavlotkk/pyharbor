@@ -1,4 +1,3 @@
-import logging
 import time
 from collections import defaultdict
 from urllib.parse import urlparse
@@ -9,12 +8,10 @@ from typing import TYPE_CHECKING
 import requests
 
 from harbor import conf
+from harbor import logger
 
 if TYPE_CHECKING:
     from requests import Response
-
-
-logger = logging.getLogger(__name__)
 
 
 class RequestStat:
