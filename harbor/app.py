@@ -37,6 +37,7 @@ class App:
 
         logger.info("Finish loading data")
 
+        self.telegram_client.remove_broken_messages()
         self.telegram_client.post_new_apartments()
 
     def _create_or_none(self, data: 'PropertyItem') -> Optional[DbApartment]:

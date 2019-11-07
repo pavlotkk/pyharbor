@@ -64,7 +64,7 @@ class BotClient:
     def add_handler(self, action: BotAction, callback):
         self._handlers[action] = callback
 
-    def post_apartment_message(self, apartment: 'DbApartment', photos: List['DbApartmentPhoto']) -> List[int]:
+    def post_apartment_photos(self, photos: List['DbApartmentPhoto']) -> List[int]:
         media = [InputMediaPhoto(p.absolute_photo_url) for p in photos]
         photo_messages = self._updater.bot.send_media_group(
             chat_id=self._main_chat_id,
@@ -73,6 +73,9 @@ class BotClient:
         )
         message_ids = [m.message_id for m in photo_messages]
 
+        return message_ids
+
+    def post_apartment_description(self, apartment: 'DbApartment') -> int:
         star_btn = InlineKeyboardButton(
             text="👍",
             callback_data=f'{BotAction.Like.value};{apartment.row_id}'
@@ -96,9 +99,8 @@ class BotClient:
             reply_markup=reply_markup,
             timeout=20,
         )
-        message_ids.append(response.message_id)
 
-        return message_ids
+        return response.message_id
 
     def update_apartment_message(self, message_id: int, apartment: 'DbApartment') -> int:
         response = self._updater.bot.edit_message_text(
@@ -115,7 +117,7 @@ class BotClient:
         return response.message_id
 
     def delete_apartment_message(self, apartment: 'DbApartment'):
-        tel_message_ids = apartment.get_telegram_message_ids()
+        tel_message_ids = apartment.telegram.get_message_ids()
         for m_id in tel_message_ids:
             self._updater.bot.delete_message(self._main_chat_id, int(m_id))
 

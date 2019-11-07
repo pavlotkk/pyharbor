@@ -37,18 +37,31 @@ class TelegramBot:
         self.stop_polling()
         self.start_polling()
 
+    def remove_broken_messages(self):
+        apts = self._db.get_partially_sent_messages_to_telegram()
+        if not apts:
+            return
+
+        logger.info(f"Remove {len(apts)} broken telegram messages")
+        for apt in apts:
+            self._client.delete_apartment_message(apt)
+            self._db.remove_telegram_messages(apt)
+
     def post_new_apartments(self):
         logger.info("Publish new apartments to Bot")
         apts = self._db.get_new_apartments(2)
         for apt in apts:
-            ids = self.post_apartment(apt)
-            self._db.set_is_not_new(apt.row_id, ids)
+            self.post_apartment(apt)
 
     def post_apartment(self, apartment: DbApartment) -> List[str]:
         photos = apartment.photos  # type: List[DbApartmentPhoto]
-        message_ids = self._client.post_apartment_message(apartment, photos)
+        message_media_ids = self._client.post_apartment_photos(photos)
+        self._db.add_telegram_apartment_photo_messages(apartment.row_id, [str(m) for m in message_media_ids])
 
-        return [str(m) for m in message_ids]
+        message_description_id = self._client.post_apartment_description(apartment)
+        self._db.add_telegram_apartment_description_message(apartment.row_id, str(message_description_id))
+
+        return [str(m) for m in message_media_ids] + [str(message_description_id)]
 
     def _like_action_handler(self, message_id: int, apt_id: int):
         apartment = self._db.get_apartment_by_id(apt_id)
@@ -67,7 +80,7 @@ class TelegramBot:
 
         self._client.delete_apartment_message(apartment)
 
-        self._db.set_disliked(apartment.row_id)
+        self._db.remove_telegram_messages(apartment)
 
     def _error_action_handler(self, e):
         logger.error('telegram - {}'.format(str(e)))

@@ -27,35 +27,18 @@ class DbApartment(Base):
     description = sa.Column(sa.Text, nullable=True)
     create_dts = sa.Column(sa.DateTime, nullable=False, default=datetime.utcnow)
 
-    is_new = sa.Column(sa.Boolean, nullable=False, default=False)
     is_liked = sa.Column(sa.Boolean, nullable=False, default=False)
 
-    telegram_mgs_id = sa.Column(sa.Text, nullable=True)
-
     photos = relationship("DbApartmentPhoto", back_populates="apartment")
+    telegram = relationship('DbTelegram', back_populates='apartment', uselist=False)
 
     @property
     def short_description(self) -> str:
         return trim_content(self.description)
 
-    def get_telegram_message_ids(self) -> List[str]:
-        if not self.telegram_mgs_id:
-            return []
-        return self.telegram_mgs_id.split(',')
-
-    def set_telegram_message_ids(self, message_id: Optional[Union[List[str], str]]):
-        if not message_id:
-            self.telegram_mgs_id = None
-            return
-
-        ids = self.get_telegram_message_ids()
-
-        if isinstance(message_id, str):
-            ids.append(message_id)
-        else:
-            ids.extend(message_id)
-
-        self.telegram_mgs_id = ','.join((list(set(ids))))
+    @provider
+    def is_new(self):
+        return False
 
 
 class DbApartmentPhoto(Base):
@@ -65,3 +48,35 @@ class DbApartmentPhoto(Base):
     apartment_id = sa.Column(sa.Integer, sa.ForeignKey('apartments.row_id'))
     absolute_photo_url = sa.Column(sa.Text, nullable=False)
     apartment = relationship("DbApartment", back_populates="photos")
+
+
+class DbTelegram(Base):
+    __tablename__ = 'telegram_messages'
+
+    row_id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    apartment_id = sa.Column(sa.Integer, sa.ForeignKey('apartments.row_id'))
+    mgs_ids = sa.Column(sa.Text, nullable=True)
+
+    photo_sent_dts = sa.Column(sa.DateTime, nullable=True)
+    description_sent_dts = sa.Column(sa.DateTime, nullable=True)
+
+    apartment = relationship('DbApartment', back_populates='telegram', uselist=False)
+
+    def get_message_ids(self) -> List[str]:
+        if not self.mgs_ids:
+            return []
+        return self.mgs_ids.split(',')
+
+    def set_message_ids(self, message_id: Optional[Union[List[str], str]]):
+        if not message_id:
+            self.mgs_ids = None
+            return
+
+        ids = self.get_message_ids()
+
+        if isinstance(message_id, str):
+            ids.append(message_id)
+        else:
+            ids.extend(message_id)
+
+        self.mgs_ids = ','.join((list(set(ids))))
