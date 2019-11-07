@@ -39,7 +39,7 @@ class App:
         self.db.commit()
         logger.info("Finish loading data")
 
-        self.telegram_client.post_all_apartments()
+        self.telegram_client.post_new_apartments()
 
     def _create_or_none(self, data: 'PropertyItem') -> Optional[DbApartment]:
         exists = self.db.query(
@@ -70,7 +70,7 @@ class App:
         db_apartment.is_new = True
         db_apartment.is_liked = False
 
-        host = conf.get_provider(data.provider)['host']
+        host = conf.get_provider(data.provider)['base_url']
         db_apartment.absolute_url = urljoin(host, data.rel_url)
 
         for link in data.photos:

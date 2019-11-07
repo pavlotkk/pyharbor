@@ -1,3 +1,4 @@
+import logging
 import time
 
 import click
@@ -6,6 +7,9 @@ from harbor import conf
 from harbor.app import App
 from harbor.db import base as dbbase
 from harbor.utils import GracefulInterruptHandler
+
+
+logger = logging.getLogger(__name__)
 
 
 @click.group()
@@ -41,6 +45,7 @@ def run():
             try:
                 app.load()
             except Exception as ex:
+                logger.exception(ex)
                 app.release()
                 app = App()
 
