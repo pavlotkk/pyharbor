@@ -9,8 +9,8 @@ The items store in sqlite. After each pulling runs separate thead to publish off
 User can choose two options: Dislike - the offer will be removed and never posted; or Like - just save in history :)
 
 ## Implementation
-1. [https://www.python.org/downloads](Python37) , [https://github.com/pyenv/pyenv](pyenv) & [https://github.com/pypa/pipenv](pipenv)
-2. [https://www.sqlite.org/index.html](SQLite)
+1. [Python3.7](https://www.python.org/downloads) , [pyenv](https://github.com/pyenv/pyenv) & [pipenv](https://github.com/pypa/pipenv)
+2. [SQLite](https://www.sqlite.org/index.html)
 
 ## Configuration
 1. Make a copy of `config.json.example` and name it as `config.json`
