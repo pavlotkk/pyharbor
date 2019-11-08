@@ -1,6 +1,7 @@
 import traceback
-from requests.exceptions import HTTPError
 from typing import Union, List
+
+from telegram.error import TelegramError
 
 from harbor import logger
 from harbor.bot.telegram.client import BotClient, BotAction
@@ -58,14 +59,14 @@ class TelegramBot:
         photos = apartment.photos  # type: List[DbApartmentPhoto]
         try:
             message_media_ids = self._client.post_apartment_photos(photos)
-        except HTTPError as ex:
+        except TelegramError as ex:
             logger.exception(ex)
             return []
         self._db.add_telegram_apartment_photo_messages(apartment.row_id, [str(m) for m in message_media_ids])
 
         try:
             message_description_id = self._client.post_apartment_description(apartment)
-        except HTTPError as ex:
+        except TelegramError as ex:
             logger.exception(ex)
             return []
         self._db.add_telegram_apartment_description_message(apartment.row_id, str(message_description_id))
@@ -80,7 +81,7 @@ class TelegramBot:
 
         try:
             self._client.update_apartment_message(message_id, apartment)
-        except HTTPError as ex:
+        except TelegramError as ex:
             logger.exception(ex)
             return
 
@@ -93,7 +94,7 @@ class TelegramBot:
 
         try:
             self._client.delete_apartment_message(apartment)
-        except HTTPError as ex:
+        except TelegramError as ex:
             logger.exception(ex)
             return
 
