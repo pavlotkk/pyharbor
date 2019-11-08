@@ -9,7 +9,7 @@ The items store in sqlite. After each pulling runs separate thead to publish off
 User can choose two options: Dislike - the offer will be removed and never posted; or Like - just save in history :)
 
 ## Implementation
-1. [https://www.python.org/downloads/](Python 3.7) , [https://github.com/pyenv/pyenv](pyenv) & [https://github.com/pypa/pipenv](pipenv)
+1. [https://www.python.org/downloads](Python37) , [https://github.com/pyenv/pyenv](pyenv) & [https://github.com/pypa/pipenv](pipenv)
 2. [https://www.sqlite.org/index.html](SQLite)
 
 ## Configuration
